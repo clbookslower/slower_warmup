@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>디퍼 · 나를 먼저 읽기</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500&family=IM+Fell+English:ital@0;1&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0a0c0d; --bg2: #101418; --bg3: #171c20;
+  --ink: #dde4e8; --muted: #607078;
+  --accent: #88b0c4; --accent2: #486878;
+  --green: #7aaa88; --line: #1e2830;
+}
+html, body { background: var(--bg); color: var(--ink); font-family: 'Noto Serif KR', serif; font-weight: 300; }
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 999; opacity: 0.5;
+}
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+@keyframes glow { 0%,100% { box-shadow:0 0 4px var(--accent); } 50% { box-shadow:0 0 12px var(--accent); } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+const sections = [
+  {
+    num: 1,
+    trivium: "Grammatica",
+    title: "문법",
+    subtitle: "나를 정확히 읽기",
+    desc: "트리비움의 첫 번째 도구. 문법은 언어의 규칙이 아니라, 사물을 있는 그대로 읽는 능력입니다. 나를 해체하기 전에, 먼저 나를 정확히 보는 것.",
+    color: "#88b0c4",
+    questions: [
+      {
+        label: "나의 언어",
+        text: "내가 자주 쓰는 단어 세 개를 떠올려보세요.\n말할 때도, 글 쓸 때도 자꾸 나오는 것들.\n그 단어들이 나에 대해 무엇을 말하고 있나요?"
+      },
+      {
+        label: "나의 원천",
+        text: "지금까지 내가 쓴 것들 중 — 블로그든, SNS든, 메모든 —\n가장 나답다고 느껴지는 문장 하나를 찾아보세요.\n왜 그 문장인가요?"
+      },
+      {
+        label: "나의 목소리",
+        text: "내 글을 읽은 사람들이 자주 하는 말이 있나요.\n혹은 내가 듣고 싶은 말이 있나요.\n그 사이 어딘가에 내 목소리의 결이 있습니다."
+      }
+    ]
+  },
+  {
+    num: 2,
+    trivium: "Dialectica",
+    title: "논리",
+    subtitle: "나만의 구조 발견하기",
+    desc: "트리비움의 두 번째 도구. 논리는 옳고 그름을 가리는 것이 아니라, 내 안의 것들 사이에서 관계를 찾는 것입니다. 내가 진짜 원하는 것과, 해왔던 것 사이의 구조를 보는 것.",
+    color: "#7aaa88",
+    questions: [
+      {
+        label: "진짜와 덧붙여진 것",
+        text: "지금 내 브랜드 혹은 나를 소개하는 방식에서 —\n진짜 내 것인 것과, 언젠가 남의 기준으로 붙여온 것을 구분해보세요.\n각각 하나씩만."
+      },
+      {
+        label: "내가 절대 안 하는 것",
+        text: "어떤 제안이나 기회가 와도 하지 않는 것이 있나요.\n이유를 설명하기 어려운데 그냥 싫은 것.\n그 경계선이 사실 나의 가장 솔직한 윤곽입니다."
+      },
+      {
+        label: "반복되는 패턴",
+        text: "내가 가장 잘 되었다고 느꼈던 순간들을 떠올려보세요.\n공통점이 있나요 — 장소, 상태, 함께한 사람, 하고 있던 일.\n그 패턴 안에 내 구조가 있습니다."
+      }
+    ]
+  },
+  {
+    num: 3,
+    trivium: "Rhetorica",
+    title: "수사",
+    subtitle: "세상에 닿는 언어 찾기",
+    desc: "트리비움의 세 번째 도구. 수사는 꾸미는 것이 아니라, 내 안의 것을 타인에게 가닿게 하는 방식입니다. 나를 읽고, 구조를 찾은 뒤 — 이제 어떤 언어로 세상에 닿을 것인가.",
+    color: "#c4a882",
+    questions: [
+      {
+        label: "나의 독자",
+        text: "내 글이나 작업이 닿았으면 하는 사람을 한 명만 떠올려보세요.\n구체적인 누군가여도 좋고, 어떤 상태의 사람이어도 좋아요.\n그 사람에게 가장 먼저 하고 싶은 말은 무엇인가요?"
+      },
+      {
+        label: "나만 할 수 있는 말",
+        text: "내 경험 중에서 나만 이 방식으로 말할 수 있는 것이 있나요.\n누구나 아는 주제인데, 내 시각으로만 보이는 각도.\n그것이 나의 독점적 관점의 씨앗입니다."
+      },
+      {
+        label: "3개월 후",
+        text: "디퍼가 끝날 때, 나는 어떤 문장으로 나를 소개하고 싶나요.\n지금과 무엇이 달라져 있으면 좋겠나요.\n아직 몰라도 됩니다. 떠오르는 것만."
+      }
+    ]
+  }
+];
+
+function App() {
+  const [activeSection, setActiveSection] = useState(1);
+  const [openQ, setOpenQ] = useState(0);
+  const [copied, setCopied] = useState(null);
+
+  const s = sections[activeSection - 1];
+
+  function copyText(text, idx) {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(idx);
+      setTimeout(() => setCopied(null), 2000);
+    });
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+
+      {/* Header */}
+      <header style={{
+        padding: '1.4rem 2rem',
+        borderBottom: '1px solid var(--line)',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        position: 'sticky', top: 0,
+        background: 'rgba(10,12,13,0.95)', backdropFilter: 'blur(12px)', zIndex: 50
+      }}>
+        <div style={{ fontFamily: "'IM Fell English',serif", fontStyle:'italic', fontSize:'1.05rem', color:'var(--accent)' }}>
+          Deeper <span style={{ color:'var(--muted)', fontSize:'0.75rem', fontStyle:'normal', fontFamily:"'Noto Sans KR',sans-serif", fontWeight:300, letterSpacing:'0.1em' }}>나를 먼저 읽기</span>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+          <div style={{ width:6, height:6, borderRadius:'50%', background:'var(--accent)', animation:'glow 2s ease infinite' }} />
+          <span style={{ fontFamily:"'Noto Sans KR',sans-serif", fontWeight:300, fontSize:'0.7rem', color:'var(--muted)', letterSpacing:'0.1em' }}>디퍼 언브랜딩살롱 1기</span>
+        </div>
+      </header>
+
+      <main style={{ flex:1, maxWidth:660, margin:'0 auto', width:'100%', padding:'2.5rem 1.5rem 6rem' }}>
+
+        {/* Trivium tabs */}
+        <div style={{ display:'flex', gap:6, marginBottom:'2.5rem' }}>
+          {sections.map(sec => (
+            <button key={sec.num} onClick={() => { setActiveSection(sec.num); setOpenQ(0); }} style={{
+              flex: 1,
+              padding: '0.6rem 0.5rem',
+              border: `1px solid ${activeSection === sec.num ? sec.color : 'var(--line)'}`,
+              background: activeSection === sec.num ? `rgba(${sec.num === 1 ? '136,176,196' : sec.num === 2 ? '122,170,136' : '196,168,130'},0.08)` : 'transparent',
+              color: activeSection === sec.num ? sec.color : 'var(--muted)',
+              fontSize: '0.72rem',
+              fontFamily: "'Noto Sans KR',sans-serif", fontWeight:300,
+              letterSpacing:'0.06em', cursor:'pointer', borderRadius:2,
+              transition:'all 0.2s', textAlign:'center'
+            }}>
+              <div style={{ fontFamily:"'IM Fell English',serif", fontStyle:'italic', fontSize:'0.78rem', marginBottom:'2px' }}>{sec.trivium === 'Grammatica' ? 'Grammar' : sec.trivium === 'Dialectica' ? 'Logic' : 'Rhetoric'}</div>
+              {sec.title}
+            </button>
+          ))}
+        </div>
+
+        {/* Section header */}
+        <div style={{ marginBottom:'2rem', animation:'fadeUp 0.4s ease both' }}>
+          <div style={{ fontFamily:"'Noto Sans KR',sans-serif", fontWeight:300, fontSize:'0.7rem', color:'var(--muted)', letterSpacing:'0.2em', marginBottom:'0.5rem' }}>
+            {String(s.num).padStart(2,'0')} / 03
+          </div>
+          <div style={{ fontFamily:"'IM Fell English',serif", fontStyle:'italic', fontSize:'1.8rem', color: s.color, lineHeight:1.2 }}>
+            {s.trivium === 'Grammatica' ? 'Grammar' : s.trivium === 'Dialectica' ? 'Logic' : 'Rhetoric'}
+          </div>
+          <div style={{ fontSize:'0.82rem', color:'var(--muted)', marginTop:'0.4rem', fontFamily:"'Noto Sans KR',sans-serif", fontWeight:300 }}>
+            {s.subtitle}
+          </div>
+        </div>
+
+        {/* Concept card */}
+        <div style={{
+          border:'1px solid var(--line)', background:'var(--bg2)',
+          padding:'1.8rem 2rem', marginBottom:'2rem',
+          position:'relative', overflow:'hidden',
+          animation:'fadeUp 0.4s ease 0.05s both'
+        }}>
+          <div style={{ position:'absolute', top:0, left:0, width:3, height:'100%', background:`linear-gradient(to bottom, ${s.color}, transparent)` }} />
+          <div style={{ fontFamily:"'Noto Sans KR',sans-serif", fontWeight:300, fontSize:'0.65rem', color:'var(--muted)', letterSpacing:'0.2em', textTransform:'uppercase', marginBottom:'1rem' }}>
+            트리비움 · {s.trivium === 'Grammatica' ? 'Grammar' : s.trivium === 'Dialectica' ? 'Logic' : 'Rhetoric'}
+          </div>
+          <div style={{ fontSize:'0.92rem', lineHeight:2, color:'#a0b0b8' }}>
+            {s.desc}
+          </div>
+        </div>
+
+        {/* Questions */}
+        <div style={{ animation:'fadeUp 0.4s ease 0.1s both' }}>
+          <div style={{
+            fontFamily:"'Noto Sans KR',sans-serif", fontSize:'0.65rem', fontWeight:400,
+            letterSpacing:'0.22em', textTransform:'uppercase', color:'var(--muted)',
+            marginBottom:'1rem', display:'flex', alignItems:'center', gap:'0.8rem'
+          }}>
+            머물러 생각해보기
+            <div style={{ flex:1, height:1, background:'var(--line)' }} />
+          </div>
+
+          {s.questions.map((q, i) => (
+            <div key={i} style={{ marginBottom:'0.8rem' }}>
+              <div
+                onClick={() => setOpenQ(openQ === i ? null : i)}
+                style={{
+                  display:'flex', justifyContent:'space-between', alignItems:'center',
+                  padding:'1rem 1.5rem',
+                  border:`1px solid ${openQ === i ? s.color + '80' : 'var(--line)'}`,
+                  background: openQ === i ? `rgba(${s.num === 1 ? '136,176,196' : s.num === 2 ? '122,170,136' : '196,168,130'},0.05)` : 'var(--bg2)',
+                  cursor:'pointer', transition:'all 0.2s',
+                  borderBottom: openQ === i ? 'none' : undefined
+                }}
+              >
+                <div style={{ display:'flex', alignItems:'center', gap:'0.8rem' }}>
+                  <span style={{ fontFamily:"'IM Fell English',serif", fontStyle:'italic', fontSize:'0.85rem', color: s.color, opacity:0.7 }}>
+                    {String(i+1).padStart(2,'0')}
+                  </span>
+                  <span style={{ fontFamily:"'Noto Sans KR',sans-serif", fontWeight:300, fontSize:'0.85rem', color: openQ === i ? 'var(--ink)' : 'var(--muted)' }}>
+                    {q.label}
+                  </span>
+                </div>
+                <span style={{ color:'var(--muted)', fontSize:'0.8rem', transition:'transform 0.2s', display:'inline-block', transform: openQ === i ? 'rotate(180deg)' : 'none' }}>
+                  ↓
+                </span>
+              </div>
+
+              {openQ === i && (
+                <div style={{
+                  border:`1px solid ${s.color}50`, borderTop:'none',
+                  background:'var(--bg3)', padding:'1.5rem 2rem'
+                }}>
+                  <div style={{ fontSize:'0.95rem', lineHeight:2.1, color:'var(--ink)', whiteSpace:'pre-wrap', marginBottom:'1.2rem' }}>
+                    {q.text}
+                  </div>
+                  <button
+                    onClick={() => copyText(q.text, i)}
+                    style={{
+                      background: copied === i ? `rgba(${s.num === 1 ? '136,176,196' : s.num === 2 ? '122,170,136' : '196,168,130'},0.12)` : 'none',
+                      border:`1px solid ${copied === i ? s.color : 'var(--line)'}`,
+                      color: copied === i ? s.color : 'var(--muted)',
+                      fontSize:'0.75rem', fontFamily:"'Noto Sans KR',sans-serif", fontWeight:300,
+                      padding:'0.45rem 1.2rem', cursor:'pointer', letterSpacing:'0.1em',
+                      transition:'all 0.2s'
+                    }}
+                  >
+                    {copied === i ? '✓ 복사됨' : '복사하기'}
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom note */}
+        <div style={{
+          marginTop:'3rem', padding:'1.5rem 2rem',
+          border:'1px dashed var(--line)',
+          animation:'fadeUp 0.4s ease 0.2s both'
+        }}>
+          <div style={{ fontSize:'0.82rem', lineHeight:2, color:'var(--muted)', fontFamily:"'Noto Sans KR',sans-serif", fontWeight:300 }}>
+            답을 찾으려 하지 않아도 됩니다.<br/>
+            질문 앞에 잠시 머무는 것만으로도 충분해요.<br/>
+            살롱이 시작될 때, 이 질문들이 길을 열어줄 거예요.
+          </div>
+        </div>
+
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
